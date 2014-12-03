@@ -35,6 +35,7 @@
 #include "gis-keyboard-page.h"
 #include "keyboard-resources.h"
 #include "cc-input-chooser.h"
+#include "cc-keyboard-detector.h"
 
 #define GNOME_DESKTOP_USE_UNSTABLE_API
 #include <libgnome-desktop/gnome-xkb-info.h>
@@ -235,6 +236,7 @@ update_separator_func (GtkWidget **separator,
 
 static void show_input_chooser (GisKeyboardPage *self);
 static void remove_selected_input (GisKeyboardPage *self);
+static void show_keyboard_detector (GisKeyboardPage *self);
 
 #ifdef HAVE_IBUS
 static void
@@ -955,11 +957,69 @@ show_selected_layout (GisKeyboardPage *self)
 }
 
 static void
-auto_detect (GisKeyboardPage *self)
+detector_response (GtkWidget *detector, gint response_id, gpointer data)
+{
+	GisKeyboardPage *self = data;
+        gchar *type;
+        gchar *id;
+        gchar *name;
+        GDesktopAppInfo *app_info = NULL;
+
+        if (response_id == GTK_RESPONSE_OK) {
+                if (cc_keyboard_detector_get_selected (detector, &type, &id, &name) &&
+                    !input_source_already_added (self, id)) {
+                        if (g_str_equal (type, INPUT_SOURCE_TYPE_IBUS)) {
+                                g_free (type);
+                                type = INPUT_SOURCE_TYPE_IBUS;
+#ifdef HAVE_IBUS
+                                app_info = setup_app_info_for_id (id);
+#endif
+                        } else {
+                                g_free (type);
+                                type = INPUT_SOURCE_TYPE_XKB;
+                        }
+
+                        add_input_row (self, type, id, name, app_info);
+                        update_buttons (self);
+                        update_input (self);
+                        select_input (self, id);
+
+                        g_free (id);
+                        g_free (name);
+                        g_clear_object (&app_info);
+                }
+        }
+        gtk_widget_destroy (detector);
+        g_object_set_data (G_OBJECT (self), "keyboard-detector", NULL);
+}
+
+static void
+show_keyboard_detector (GisKeyboardPage *self)
 {
         GisKeyboardPagePrivate *priv = gis_keyboard_page_get_instance_private (self);
-        /* TODO Incorporate the keyboard detection heuristic */
-        printf("auto_detect\n");
+        GtkWidget *detector;
+        GtkWidget *toplevel;
+
+        toplevel = gtk_widget_get_toplevel (GTK_WIDGET (self));
+        detector = cc_keyboard_detector_new (GTK_WINDOW (toplevel),
+                                             priv->xkb_info,
+#ifdef HAVE_IBUS
+                                             priv->ibus_engines
+#else
+                                             NULL
+#endif
+                );
+        g_signal_connect (detector, "response",
+                          G_CALLBACK (detector_response), self);
+        gtk_window_present (GTK_WINDOW (detector));
+
+        g_object_set_data (G_OBJECT (self), "keyboard-detector", detector);
+}
+
+static void
+auto_detect (GisKeyboardPage *self)
+{
+        show_keyboard_detector(self);
 }
 
 static void
