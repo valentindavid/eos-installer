@@ -3,49 +3,49 @@
   <!-- interface-requires gtk+ 3.0 -->
   <object class="GtkDialog" id="input-dialog">
     <property name="title" translatable="yes">Detect Keyboard Layout...</property>
-    <property name="default_height">350</property>
+    <property name="default_height">-1</property>
     <property name="modal">True</property>
+    <property name="border-width">20</property>
     <property name="destroy_with_parent">True</property>
-    <property name="resizable">True</property>
+    <property name="resizable">False</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="vbox">
         <property name="visible">True</property>
         <property name="orientation">vertical</property>
-        <property name="spacing">0</property>
+        <property name="spacing">20</property>
+
+
+
+	<child>
+	  <object class="GtkLabel" id="heading">
+	    <property name="visible">True</property>
+	    <property name="can_focus">False</property>
+	    <property name="xalign">0</property>
+	    <property name="label" translatable="yes">Please press one of the following keys:</property>
+	  </object>
+	</child>
+
+
         <child>
-          <object class="GtkScrolledWindow" id="scrolledwindow">
+          <object class="GtkButtonBox" id="buttons">
             <property name="visible">True</property>
-            <property name="hscrollbar-policy">never</property>
-            <property name="vscrollbar-policy">never</property>
-            <property name="shadow-type">in</property>
-            <property name="margin-left">6</property>
-            <property name="margin-right">6</property>
-            <property name="margin-top">6</property>
-            <property name="margin-bottom">6</property>
+            <property name="orientation">horizontal</property>
             <child>
-              <object class="GtkViewport" id="viewport">
+              <object class="GtkButton" id="no-button">
                 <property name="visible">True</property>
-                <child>
-                  <object class="EggListBox" id="list">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="vexpand">True</property>
-                    <property name="halign">fill</property>
-                    <property name="valign">fill</property>
-                  </object>
-                </child>
+                <property name="label">gtk-no</property>
+                <property name="use_stock">True</property>
+                <property name="use_underline" >True</property>
               </object>
             </child>
-          </object>
-        </child>
-        <child>
-          <object class="GtkSearchEntry" id="filter-entry">
-            <property name="visible">False</property>
-            <property name="hexpand">True</property>
-            <property name="margin-left">6</property>
-            <property name="margin-right">6</property>
-            <property name="margin-top">6</property>
-            <property name="margin-bottom">6</property>
+            <child>
+              <object class="GtkButton" id="yes-button">
+                <property name="visible">True</property>
+                <property name="label">gtk-yes</property>
+                <property name="use_stock">True</property>
+                <property name="use_underline" >True</property>
+              </object>
+            </child>
           </object>
         </child>
         <child internal-child="action_area">
@@ -74,6 +74,8 @@
       </object>
     </child>
     <action-widgets>
+      <action-widget response="-9">no-button</action-widget>
+      <action-widget response="-8">yes-button</action-widget>
       <action-widget response="-5">add-button</action-widget>
       <action-widget response="-6">cancel-button</action-widget>
     </action-widgets>

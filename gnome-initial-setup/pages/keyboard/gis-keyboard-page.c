@@ -965,6 +965,16 @@ detector_response (GtkWidget *detector, gint response_id, gpointer data)
         gchar *name;
         GDesktopAppInfo *app_info = NULL;
 
+        if (response_id == GTK_RESPONSE_YES) {
+            printf("Yes\n");
+            return;
+	}
+
+        if (response_id == GTK_RESPONSE_NO) {
+            printf("No\n");
+            return;
+	}
+
         if (response_id == GTK_RESPONSE_OK) {
                 if (cc_keyboard_detector_get_selected (detector, &type, &id, &name) &&
                     !input_source_already_added (self, id)) {
