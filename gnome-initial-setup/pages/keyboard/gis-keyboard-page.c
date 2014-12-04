@@ -35,7 +35,7 @@
 #include "gis-keyboard-page.h"
 #include "keyboard-resources.h"
 #include "cc-input-chooser.h"
-#include "cc-keyboard-detector.h"
+#include "cc-keyboard-query.h"
 
 #define GNOME_DESKTOP_USE_UNSTABLE_API
 #include <libgnome-desktop/gnome-xkb-info.h>
@@ -965,39 +965,29 @@ detector_response (GtkWidget *detector, gint response_id, gpointer data)
         gchar *name;
         GDesktopAppInfo *app_info = NULL;
 
-        if (response_id == GTK_RESPONSE_YES) {
-            printf("Yes\n");
-            return;
-	}
-
-        if (response_id == GTK_RESPONSE_NO) {
-            printf("No\n");
-            return;
-	}
-
         if (response_id == GTK_RESPONSE_OK) {
-                if (cc_keyboard_detector_get_selected (detector, &type, &id, &name) &&
-                    !input_source_already_added (self, id)) {
-                        if (g_str_equal (type, INPUT_SOURCE_TYPE_IBUS)) {
-                                g_free (type);
-                                type = INPUT_SOURCE_TYPE_IBUS;
-#ifdef HAVE_IBUS
-                                app_info = setup_app_info_for_id (id);
-#endif
-                        } else {
-                                g_free (type);
-                                type = INPUT_SOURCE_TYPE_XKB;
-                        }
+//                 if (cc_keyboard_detector_get_selected (detector, &type, &id, &name) &&
+//                     !input_source_already_added (self, id)) {
+//                         if (g_str_equal (type, INPUT_SOURCE_TYPE_IBUS)) {
+//                                 g_free (type);
+//                                 type = INPUT_SOURCE_TYPE_IBUS;
+// #ifdef HAVE_IBUS
+//                                 app_info = setup_app_info_for_id (id);
+// #endif
+//                         } else {
+//                                 g_free (type);
+//                                 type = INPUT_SOURCE_TYPE_XKB;
+//                         }
 
-                        add_input_row (self, type, id, name, app_info);
-                        update_buttons (self);
-                        update_input (self);
-                        select_input (self, id);
+//                         add_input_row (self, type, id, name, app_info);
+//                         update_buttons (self);
+//                         update_input (self);
+//                         select_input (self, id);
 
-                        g_free (id);
-                        g_free (name);
-                        g_clear_object (&app_info);
-                }
+//                         g_free (id);
+//                         g_free (name);
+//                         g_clear_object (&app_info);
+//                 }
         }
         gtk_widget_destroy (detector);
         g_object_set_data (G_OBJECT (self), "keyboard-detector", NULL);
@@ -1011,12 +1001,12 @@ show_keyboard_detector (GisKeyboardPage *self)
         GtkWidget *toplevel;
 
         toplevel = gtk_widget_get_toplevel (GTK_WIDGET (self));
-        detector = cc_keyboard_detector_new (GTK_WINDOW (toplevel),
-                                             priv->xkb_info,
+        detector = cc_keyboard_query_new (GTK_WINDOW (toplevel),
+                                          priv->xkb_info,
 #ifdef HAVE_IBUS
-                                             priv->ibus_engines
+                                          priv->ibus_engines
 #else
-                                             NULL
+                                          NULL
 #endif
                 );
         g_signal_connect (detector, "response",
